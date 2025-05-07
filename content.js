@@ -25,39 +25,168 @@ function createPopup(selectedText) {
   document.body.appendChild(popup);
   const style = document.createElement("style");
   style.textContent = `
-  #ai-popup {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: #fff;
-    padding: 16px;
-    border-radius: 8px;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-    z-index: 10000;
-    width: 300px;
-    font-family: sans-serif;
+#ai-popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 99999;
+  background: rgba(0, 0, 0, 0.2); /* 半透明背景 */
+  padding: 0;
+  margin: 0;
+}
+
+.ai-popup-inner {
+  background-color: #ffffff;
+  color: #333;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+  width: 320px;
+  max-width: 90vw;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  animation: fadeIn 0.3s ease;
+}
+
+.ai-popup-inner textarea {
+  width: 100%;
+  height: 120px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+  resize: vertical;
+  box-sizing: border-box;
+  font-family: inherit;
+  transition: border 0.2s ease;
+}
+
+.ai-popup-inner textarea:focus {
+  border-color: #4a90e2;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+}
+
+.ai-popup-actions {
+  margin-top: 16px;
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.ai-popup-actions button {
+  flex: 1;
+  padding: 10px 14px;
+  font-size: 14px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+#ai-confirm {
+  background-color: #4a90e2;
+  color: white;
+}
+
+#ai-close {
+  background-color: #e0e0e0;
+  color: #333;
+}
+
+.ai-popup-actions button:hover {
+  transform: translateY(-1px);
+}
+
+.ai-popup-actions button:active {
+  transform: translateY(0);
+}
+
+.ai-answer-popup {
+  margin-top: 20px;
+  background-color: #f9f9f9;
+  color: #333;
+  padding: 14px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  line-height: 1.5;
+  border: 1px solid #e0e0e0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  white-space: pre-wrap;
+  animation: fadeIn 0.25s ease;
+  max-height: 300px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #ccc transparent;
+  word-break: break-word;
+}
+
+.ai-answer-popup::-webkit-scrollbar {
+  width: 6px;
+}
+
+.ai-answer-popup::-webkit-scrollbar-thumb {
+  background-color: #ccc;
+  border-radius: 4px;
+}
+
+.ai-answer-text {
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin-bottom: 12px;
+}
+
+.ai-copy-button {
+  background-color: #f0f0f0;
+  color: #333;
+  border: 1px solid #ccc;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.ai-copy-button:hover {
+  background-color: #e0e0e0;
+  transform: translateY(-1px);
+}
+
+.ai-copy-button:active {
+  transform: translateY(0);
+}
+
+.ai-toast {
+  position: fixed;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background-color: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  z-index: 100000;
+}
+
+.ai-toast.visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
   }
-  #ai-popup textarea {
-    width: 100%;
-    height: 100px;
-    margin-bottom: 12px;
+  to {
+    opacity: 1;
+    transform: scale(1);
   }
-  .ai-popup-actions {
-    display: flex;
-    justify-content: space-between;
-  }
-  .ai-answer-popup {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    background: #323232;
-    color: #fff;
-    padding: 12px 16px;
-    border-radius: 6px;
-    font-size: 14px;
-    z-index: 10000;
-  }
+}
 `;
   document.head.appendChild(style);
 
@@ -65,14 +194,54 @@ function createPopup(selectedText) {
   document.getElementById("ai-confirm").onclick = () => {
     const question = popup.querySelector("textarea").value;
     chrome.runtime.sendMessage({ action: "fetchAIAnswer", question });
-    popup.remove();
+    // 移除这行：popup.remove();
   };
 }
 
 function showAnswer(answer) {
+  const popup = document.getElementById("ai-popup");
+  if (!popup) return;
+
+  const oldAnswer = popup.querySelector(".ai-answer-popup");
+  if (oldAnswer) oldAnswer.remove();
+
   const resultPopup = document.createElement("div");
   resultPopup.className = "ai-answer-popup";
-  resultPopup.innerText = "AI Answer: " + answer;
-  document.body.appendChild(resultPopup);
-  setTimeout(() => resultPopup.remove(), 8000);
+
+  const answerText = document.createElement("div");
+  answerText.innerText = answer;
+  answerText.className = "ai-answer-text";
+
+  const copyButton = document.createElement("button");
+  copyButton.className = "ai-copy-button";
+  copyButton.innerText = "复制";
+
+  copyButton.onclick = () => {
+    navigator.clipboard.writeText(answer).then(() => {
+      showToast("复制成功！");
+      copyButton.innerText = "已复制";
+      setTimeout(() => (copyButton.innerText = "复制"), 1500);
+    });
+  };
+
+  resultPopup.appendChild(answerText);
+  resultPopup.appendChild(copyButton);
+  popup.querySelector(".ai-popup-inner").appendChild(resultPopup);
+}
+
+// Toast 提示函数
+function showToast(message) {
+  const toast = document.createElement("div");
+  toast.className = "ai-toast";
+  toast.innerText = message;
+  document.body.appendChild(toast);
+
+  requestAnimationFrame(() => {
+    toast.classList.add("visible");
+  });
+
+  setTimeout(() => {
+    toast.classList.remove("visible");
+    setTimeout(() => toast.remove(), 300);
+  }, 2000);
 }
