@@ -177,6 +177,36 @@ function createPopup(selectedText) {
   transform: translateX(-50%) translateY(0);
 }
 
+.ai-answer-popup.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+  gap: 12px;
+  color: #666;
+  font-size: 14px;
+}
+
+.ai-loading-text {
+  font-style: italic;
+}
+
+.ai-loading-spinner {
+  width: 24px;
+  height: 24px;
+  border: 3px solid #ccc;
+  border-top-color: #4a90e2;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -192,16 +222,29 @@ function createPopup(selectedText) {
 
   document.getElementById("ai-close").onclick = () => popup.remove();
   document.getElementById("ai-confirm").onclick = () => {
-    const question = popup.querySelector("textarea").value;
+    const question = document.querySelector("#ai-popup textarea").value;
+
+    // 清除旧的回答区域（如有）
+    const oldAnswer = document.querySelector(".ai-answer-popup");
+    if (oldAnswer) oldAnswer.remove();
+
+    // 插入 Loading 占位
+    const loadingDiv = document.createElement("div");
+    loadingDiv.className = "ai-answer-popup loading";
+    loadingDiv.innerHTML = `<div class="ai-loading-spinner"></div><div class="ai-loading-text">AI 正在思考中...</div>`;
+
+    document.querySelector(".ai-popup-inner").appendChild(loadingDiv);
+
+    // 向后台发消息
     chrome.runtime.sendMessage({ action: "fetchAIAnswer", question });
-    // 移除这行：popup.remove();
   };
 }
 
 function showAnswer(answer) {
+  const loadingDiv = document.querySelector(".ai-answer-popup.loading");
+  if (loadingDiv) loadingDiv.remove();
   const popup = document.getElementById("ai-popup");
   if (!popup) return;
-
   const oldAnswer = popup.querySelector(".ai-answer-popup");
   if (oldAnswer) oldAnswer.remove();
 
@@ -209,8 +252,8 @@ function showAnswer(answer) {
   resultPopup.className = "ai-answer-popup";
 
   const answerText = document.createElement("div");
-  answerText.innerText = answer;
   answerText.className = "ai-answer-text";
+  answerText.innerText = answer;
 
   const copyButton = document.createElement("button");
   copyButton.className = "ai-copy-button";
@@ -226,7 +269,8 @@ function showAnswer(answer) {
 
   resultPopup.appendChild(answerText);
   resultPopup.appendChild(copyButton);
-  popup.querySelector(".ai-popup-inner").appendChild(resultPopup);
+
+  document.querySelector(".ai-popup-inner").appendChild(resultPopup);
 }
 
 // Toast 提示函数
