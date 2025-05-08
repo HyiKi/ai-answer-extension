@@ -15,13 +15,22 @@ function createPopup(selectedText) {
   popup.id = "ai-popup";
   popup.innerHTML = `
       <div class="ai-popup-inner">
-        <textarea>${selectedText}</textarea>
-        <div class="ai-popup-actions">
-          <button id="ai-confirm">确认</button>
-          <button id="ai-close">关闭</button>
-        </div>
-      </div>
+    <div class="ai-popup-header">
+      <span class="ai-popup-title">AI 问答</span>
+      <span class="ai-popup-close" title="关闭">×</span>
+    </div>
+    <textarea>${selectedText}</textarea>
+    <div class="ai-popup-actions">
+      <button id="ai-confirm">确认</button>
+      <button id="ai-close">关闭</button>
+    </div>
+  </div>
     `;
+  // 绑定顶部 [X]
+  popup.querySelector(".ai-popup-close").onclick = () => popup.remove();
+
+  // 拖拽逻辑
+  makeDraggable(popup.querySelector(".ai-popup-inner"), popup);
   document.body.appendChild(popup);
   const style = document.createElement("style");
   style.textContent = `
@@ -34,6 +43,34 @@ function createPopup(selectedText) {
   background: rgba(0, 0, 0, 0.2); /* 半透明背景 */
   padding: 0;
   margin: 0;
+}
+
+.ai-popup-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: move;
+  margin-bottom: 12px;
+  user-select: none;
+}
+
+.ai-popup-title {
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.ai-popup-close {
+  cursor: pointer;
+  font-size: 18px;
+  color: #999;
+  padding: 2px 8px;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.ai-popup-close:hover {
+  background-color: #eee;
+  color: #333;
 }
 
 .ai-popup-inner {
@@ -271,6 +308,31 @@ function showAnswer(answer) {
   resultPopup.appendChild(copyButton);
 
   document.querySelector(".ai-popup-inner").appendChild(resultPopup);
+}
+
+function makeDraggable(dragHandle, dragTarget) {
+  let isDragging = false;
+  let offsetX, offsetY;
+
+  dragHandle.addEventListener("mousedown", (e) => {
+    isDragging = true;
+    const rect = dragTarget.getBoundingClientRect();
+    offsetX = e.clientX - rect.left;
+    offsetY = e.clientY - rect.top;
+    dragTarget.style.transition = "none";
+  });
+
+  document.addEventListener("mousemove", (e) => {
+    if (isDragging) {
+      dragTarget.style.left = `${e.clientX - offsetX}px`;
+      dragTarget.style.top = `${e.clientY - offsetY}px`;
+      dragTarget.style.transform = `none`; // 禁用居中 transform
+    }
+  });
+
+  document.addEventListener("mouseup", () => {
+    isDragging = false;
+  });
 }
 
 // Toast 提示函数

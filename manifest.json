@@ -16,7 +16,7 @@
   "manifest_version": 3,
   "action": {
     "default_popup": "popup/popup.html",
-    "default_icon": "hello_extensions.png"
+    "default_icon": "QA.png"
   },
   "host_permissions": ["*://api.hyiki.sbs/*"]
 }
