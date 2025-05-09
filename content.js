@@ -16,13 +16,13 @@ function createPopup(selectedText) {
   popup.innerHTML = `
       <div class="ai-popup-inner">
     <div class="ai-popup-header">
-      <span class="ai-popup-title">AI 问答</span>
-      <span class="ai-popup-close" title="关闭">×</span>
+      <span class="ai-popup-title">AI Answer</span>
+      <span class="ai-popup-close" title="Close">×</span>
     </div>
     <textarea>${selectedText}</textarea>
     <div class="ai-popup-actions">
-      <button id="ai-confirm">确认</button>
-      <button id="ai-close">关闭</button>
+      <button id="ai-confirm">Confirm</button>
+      <button id="ai-close">Close</button>
     </div>
   </div>
     `;
@@ -30,7 +30,7 @@ function createPopup(selectedText) {
   popup.querySelector(".ai-popup-close").onclick = () => popup.remove();
 
   // 拖拽逻辑
-  makeDraggable(popup.querySelector(".ai-popup-inner"), popup);
+  makeDraggable(popup.querySelector(".ai-popup-header"), popup);
   document.body.appendChild(popup);
   const style = document.createElement("style");
   style.textContent = `
@@ -268,7 +268,7 @@ function createPopup(selectedText) {
     // 插入 Loading 占位
     const loadingDiv = document.createElement("div");
     loadingDiv.className = "ai-answer-popup loading";
-    loadingDiv.innerHTML = `<div class="ai-loading-spinner"></div><div class="ai-loading-text">AI 正在思考中...</div>`;
+    loadingDiv.innerHTML = `<div class="ai-loading-spinner"></div><div class="ai-loading-text">AI Loading...</div>`;
 
     document.querySelector(".ai-popup-inner").appendChild(loadingDiv);
 
@@ -294,13 +294,13 @@ function showAnswer(answer) {
 
   const copyButton = document.createElement("button");
   copyButton.className = "ai-copy-button";
-  copyButton.innerText = "复制";
+  copyButton.innerText = "Copy";
 
   copyButton.onclick = () => {
     navigator.clipboard.writeText(answer).then(() => {
-      showToast("复制成功！");
-      copyButton.innerText = "已复制";
-      setTimeout(() => (copyButton.innerText = "复制"), 1500);
+      showToast("Copy Success");
+      copyButton.innerText = "Copied";
+      setTimeout(() => (copyButton.innerText = "Copy"), 1500);
     });
   };
 
