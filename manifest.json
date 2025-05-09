@@ -12,7 +12,12 @@
       "css": ["styles/dialog.css"]
     }
   ],
-  "version": "1.0",
+  "icons": {
+    "16": "QA.png",
+    "48": "QA.png",
+    "128": "QA.png"
+  },
+  "version": "1.0.1",
   "manifest_version": 3,
   "action": {
     "default_popup": "popup/popup.html",

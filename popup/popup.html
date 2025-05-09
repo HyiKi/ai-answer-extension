@@ -1,6 +1,58 @@
-<html>
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>插件配置</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
   <body>
-    <h1>Hello Extensions</h1>
+    <div class="frame">
+      <div class="language-wrapper">
+        <span class="lang-label">Language:</span>
+        <select id="lang-select" class="lang-select">
+          <option value="zh">ZH</option>
+          <option value="en">EN</option>
+          <option value="ja">JA</option>
+          <option value="ko">KR</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label class="label" data-i18n="model">模型服务：</label>
+        <div class="select-wrapper">
+          <select id="model-select">
+            <option value="deepseek">DeepSeek</option>
+            <option value="chatgpt">ChatGPT</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="label" data-i18n="tool">工具：</label>
+        <div class="select-wrapper">
+          <select id="tool-select">
+            <option value="qa" data-i18n-option="qa">问答</option>
+            <option value="translate" data-i18n-option="translate">翻译</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="label" data-i18n="apikey">密钥（如必要）：</label>
+        <div class="input-wrapper">
+          <input id="apikey-input" type="password" />
+          <button class="eye-toggle" id="toggle-visibility">👁️</button>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button id="save-btn" data-i18n="save">应用</button>
+      </div>
+    </div>
+
+    <div class="version" id="plugin-version">版本：</div>
+
     <script src="popup.js"></script>
   </body>
 </html>
