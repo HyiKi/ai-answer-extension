@@ -4,6 +4,18 @@ const langSelect = document.getElementById("lang-select");
 const labels = document.querySelectorAll("[data-i18n]");
 const options = document.querySelectorAll("[data-i18n-option]");
 const versionEl = document.getElementById("plugin-version");
+const saveBtn = document.getElementById("save-btn");
+const modelSelect = document.getElementById("model-select");
+const toolSelect = document.getElementById("tool-select");
+const apikeyInput = document.getElementById("apikey-input");
+
+// 默认配置
+const DEFAULT_CONFIG = {
+  model: "deepseek",
+  tool: "qa",
+  apikey: "",
+  lang: "zh",
+};
 
 const i18n = {
   zh: {
@@ -13,7 +25,7 @@ const i18n = {
     version: "版本：",
     qa: "问答",
     translate: "翻译",
-    save: "应用"
+    save: "应用",
   },
   en: {
     model: "Model Service:",
@@ -22,7 +34,7 @@ const i18n = {
     version: "Version: ",
     qa: "Q&A",
     translate: "Translation",
-    save: "Save"
+    save: "Save",
   },
   ja: {
     model: "モデルサービス：",
@@ -31,7 +43,7 @@ const i18n = {
     version: "バージョン：",
     qa: "質疑応答",
     translate: "翻訳",
-    save: "応用"
+    save: "応用",
   },
   ko: {
     model: "모델 서비스:",
@@ -40,15 +52,17 @@ const i18n = {
     version: "버전: ",
     qa: "질의응답",
     translate: "번역",
-    save: "구하다"
+    save: "구하다",
   },
 };
 
+// 切换密钥显示
 toggleBtn.addEventListener("click", () => {
   const isPassword = input.type === "password";
   input.type = isPassword ? "text" : "password";
 });
 
+// 应用语言文本
 function applyLanguage(lang) {
   labels.forEach((label) => {
     const key = label.getAttribute("data-i18n");
@@ -64,27 +78,30 @@ function applyLanguage(lang) {
   } catch (e) {
     versionEl.textContent = i18n[lang].version + "1.0.0";
   }
+
+  // 更新“保存”按钮文字
+  if (saveBtn) saveBtn.textContent = i18n[lang].save;
 }
 
+// 下拉语言切换
 langSelect.addEventListener("change", () => {
   const lang = langSelect.value;
   applyLanguage(lang);
   chrome.storage.sync.set({ lang });
 });
 
+// 初始化加载配置（带默认值 fallback）
 document.addEventListener("DOMContentLoaded", () => {
-  chrome.storage.sync.get(["model", "tool", "apikey", "lang"], (data) => {
-    if (data.model) document.getElementById("model-select").value = data.model;
-    if (data.tool) document.getElementById("tool-select").value = data.tool;
-    if (data.apikey)
-      document.getElementById("apikey-input").value = data.apikey;
-    const lang = data.lang || "zh";
-    langSelect.value = lang;
-    applyLanguage(lang);
+  chrome.storage.sync.get(DEFAULT_CONFIG, (data) => {
+    modelSelect.value = data.model;
+    toolSelect.value = data.tool;
+    apikeyInput.value = data.apikey;
+    langSelect.value = data.lang;
+    applyLanguage(data.lang);
   });
 });
 
-document.getElementById("save-btn").addEventListener("click", () => {
+saveBtn.addEventListener("click", () => {
   const config = {
     model: document.getElementById("model-select").value,
     tool: document.getElementById("tool-select").value,
@@ -92,6 +109,6 @@ document.getElementById("save-btn").addEventListener("click", () => {
     lang: document.getElementById("lang-select").value,
   };
   chrome.storage.sync.set(config, () => {
-    alert("配置已保存 ✅" + JSON.stringify(config));
+    alert("Save Config ✅" + JSON.stringify(config));
   });
 });
